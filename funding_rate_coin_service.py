@@ -61,7 +61,7 @@ def get_sleep_seconds():
   return sleep_time.total_seconds()
 
 def send_email(content):
-  lines_content = "3140618@163.com\n\nu-swap-isolated funding rate\n\n{0}".format(content)
+  lines_content = "3140618@163.com\n\nbinace u-swap funding rate\n\n{0}".format(content)
   rc = redis.StrictRedis(host='127.0.0.1', port='6379')
   rc.publish("email", lines_content)
 
