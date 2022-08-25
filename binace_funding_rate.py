@@ -6,13 +6,13 @@ import urllib.request
 import json
 from datetime import datetime, timedelta
 from logger import *
-import redis
 import time
 
 URL = 'https://www.binance.com/fapi/v1/premiumIndex'
 COST_FEE_RATE = (0.04)*2*0.01
 
-def get_funding_rate() ->float:
+
+def get_funding_rate() -> float:
   try:
     req = urllib.request.Request(URL, method='GET')
     response = urllib.request.urlopen(req)
@@ -30,12 +30,13 @@ def get_funding_rate() ->float:
         osd[symbol] = funding_rate
       if funding_rate < -COST_FEE_RATE:
         old[symbol] = funding_rate
-    osd={k: v for k, v in sorted(osd.items(), key=lambda item: item[1])}
-    old={k: v for k, v in sorted(old.items(), key=lambda item: item[1])}
-    return osd,old
+    osd = {k: v for k, v in sorted(osd.items(), key=lambda item: item[1])}
+    old = {k: v for k, v in sorted(old.items(), key=lambda item: item[1])}
+    return osd, old
   except Exception as e:
     logger.error(e)
-    return None,None
+    return None, None
+
 
 def get_sleep_seconds():
   now_time = datetime.now()
@@ -60,17 +61,13 @@ def get_sleep_seconds():
     return 0
   return sleep_time.total_seconds()
 
-def send_email(content):
-  lines_content = "3140618@163.com\n\nbinace u-swap funding rate\n\n{0}".format(content)
-  rc = redis.StrictRedis(host='127.0.0.1', port='6379')
-  rc.publish("email", lines_content)
 
 if __name__ == '__main__':
   while True:
-    open_short,open_long = get_funding_rate()
+    open_short, open_long = get_funding_rate()
     if open_short is not None or open_long is not None:
-      msg = 'open short:' + json.dumps(open_short) + ';open long:' + json.dumps(open_long)
-      send_email(msg)
+      msg = 'open short:' + \
+          json.dumps(open_short) + ';open long:' + json.dumps(open_long)
       logger.info(msg)
     sleep_time = get_sleep_seconds()
     time.sleep(sleep_time)
